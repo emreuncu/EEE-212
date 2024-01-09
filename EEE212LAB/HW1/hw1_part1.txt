@@ -1,0 +1,20 @@
+	org 00h
+	sjmp start
+start:	mov r0, #64
+	mov r1, #16
+	;cjne r1, #00h, dwm
+	;sjmp ovf
+dwm:	mov a, r0
+	mov b, r1
+	div ab
+	jb ov, y
+	mov r3,b
+	mov b, r1
+	cjne r3, #00h, x
+	setb c
+	jc y
+ovf:	;setb ov
+x:	clr c
+y:	sjmp y
+	end
+

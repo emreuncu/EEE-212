@@ -1,0 +1,1406 @@
+	org 0000h
+	ljmp start
+	org 000Bh
+	ljmp kes1
+	org 001Bh
+	ljmp kes2
+	org 0030h
+
+start:	mov r0, #48h
+	mov r1, #50h
+	lcall CONFIGURE_LCD
+	clr a
+	mov dptr,#f
+	lcall DATA_LOOP
+
+fh:	mov a, #20h
+	lcall SEND_DATA
+	mov a, #48h
+	lcall SEND_DATA
+	mov a, #7Ah
+	lcall SEND_DATA
+
+	lcall	CONFIGURE_LCD2
+	clr a
+	mov dptr,#D
+	lcall DATA_LOOP2
+		
+dh:	mov a, #20h
+	lcall SEND_DATA
+	mov a, #25h
+	lcall SEND_DATA
+
+	mov a, 48h
+	mov b, #100
+	mul ab
+	mov 40h, a
+	mov a, 49h
+	mov b, #10
+	mul ab
+	mov b, a
+	mov a, 40h
+	add a, b
+	add a, 4Ah
+	mov 40h, a   ;f
+
+	mov a, 50h
+	mov b, #100
+	mul ab
+	mov 30h, a
+	mov a, 51h
+	mov b, #10
+	mul ab
+	mov b, a
+	mov a, 30h
+	add a, b
+	add a, 52h
+	mov 30h, a    ;d
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	mov b, 30h
+	mov a, #100d
+	clr c
+	subb a, b
+	clr c
+	clr ac
+	mov 31h, a     ;100-d
+
+w2:	mov 5Eh, 40h    ;f2
+	mov 5Fh, 30h    ;d2
+	mov a, 5Fh
+	rr a
+	mov 5Fh, a	;d2
+	mov b, #3d
+	mov a, 5Eh
+	mul ab
+	push ACC
+	xch a, b
+	cjne a, #01d, notsat
+	mov 5Eh, #255d	;f2
+	sjmp oke
+notsat:	pop ACC
+	mov 5Eh, a	;f2
+	
+oke:	mov b, 5Fh
+	mov a, #100d
+	clr c
+	subb a, b
+	clr c
+	clr ac
+	mov 5Dh, a    ;100-d2
+
+;	acall calc
+;	mov 40h, 38h
+;	mov 41h, 36h
+;	mov 42h, 37h
+;
+;	mov 30h, 31h
+;	acall calc
+;	mov 43h, 39h
+;	mov 44h, 3Eh
+;	mov 45h, 3Fh
+;
+;	mov 40h, 5Eh
+;	mov 30h, 5Fh
+;	acall calc
+;	mov 46h, 3Ah
+;	mov 47h, 4Eh
+;	mov 48h, 4Fh
+;
+;	mov 40h, 5Eh
+;	mov 30h, 5Dh
+;	acall calc
+;	mov 49h, 3Bh
+;	mov 4Ah, 56h
+;	mov 4Bh, 57h
+;	ljmp ledalga
+	
+calc:	mov 0Fh, 40h   ;f ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; w1 on
+	mov a, 	 30h   ;d
+	mov b,   #25d  ;25
+	mul ab
+	mov r7, a
+	mov r6, b
+
+	mov a, r7
+	mov b, 0Fh
+	div ab
+	mov r2, a
+	mov r3, b
+	mov a, #255
+	mov b, 0Fh
+	div ab
+	inc b
+	push b
+	mov b, r6
+	mul ab
+	mov 0Ah, a
+	mov 09h, b
+	pop b
+	mov a, b
+	mov b, r6
+	mul ab
+rtrn:	cjne a, 0Fh, x
+	sjmp x1
+x:	jnc x1
+	sjmp x2
+x1:	subb a, 0Fh
+	push ACC
+	mov a, 0Ah
+	addc a, #01d
+	mov 0Ah, a
+	pop ACC
+	jc cvar
+	sjmp rtrn
+cvar:   clr c
+	mov 09h, #01d
+	sjmp rtrn
+x2:	mov 0Bh, a
+	mov a, r2
+	add a, 0Ah
+	mov r2, a
+	mov r1, 09h
+	mov a, r3
+	add a, 0Bh
+	cjne a, 0Fh, x0
+	sjmp x10
+x0:	jnc x10
+	sjmp x20
+x10:	subb a, 0Fh
+	inc r2
+x20:    mov r3, a
+
+
+	mov     a, #25d           ; load X low byte into acc
+        mov     b, r2           ; load Y low byte into B
+        mul     ab              ; multiply
+        push    acc             ; stack result low byte
+        push    b               ; stack result high byte
+        mov     a, #25d           ; load X into acc again
+        mov     b, r1           ; load Y high byte into B
+        mul     ab              ; multiply
+        pop     50h             ; recall X*YL high byte
+        add     a, 50h           ; add X*YL high and X*YH low
+        mov     11h, a           ; save result
+        clr     a               ; clear accumulator
+        addc    a, b            ; a = b + carry flag
+        mov     51h, a           ; save result
+        pop     12h             ; get low result
+        
+	mov a, r3
+	mov b, #25d
+	mul ab
+	mov 13h, b
+	mov 14h, a
+
+	mov a, 14h
+	mov b, 0Fh
+	div ab
+	mov r2, a
+	mov r3, b
+	mov a, #255
+	mov b, 0Fh
+	div ab
+	inc b
+	push b
+	mov b, 13h
+	mul ab
+	mov 0Ah, a
+	pop b
+	mov a, b
+	mov b, 13h
+	mul ab
+	cjne a, 0Fh, x111
+	sjmp x11
+x111:	jnc x11
+	sjmp x21
+x11:	subb a, 0Fh
+	inc 0Ah
+x21:	mov 0Bh, a
+	mov a, r2
+	add a, 0Ah
+	mov r2, a
+	mov a, r3
+	add a, 0Bh
+	cjne a, 0Fh, x01
+	sjmp x101
+x01:	jnc x101
+	sjmp x201
+x101:	subb a, 0Fh
+	inc r2
+x201:   mov r3, a
+	mov 1Ch, r3
+	mov a, 12h
+	clr c
+	addc a, r2
+	mov 1Ah, a
+	mov a, 11h
+	jc crry
+	mov 19h, a
+	sjmp next
+crry:	inc a
+	mov 19h, a
+next:	
+
+
+	mov 47h, #04d
+	mov r7, 1Ah
+	mov r6, 19h
+	init: clr c
+	mov a, r7
+	rlc a
+	mov r7, a
+	mov a, r6
+	rlc a
+	mov r6, a
+	jc xm
+	mov a, r5
+	rlc a
+	mov r5, a
+	djnz 47h, init
+	sjmp low
+	xm:
+	mov a, r5
+	rlc a
+	mov r5, a
+	djnz 47h, init
+
+low:
+	mov 47h, #04d
+	mov 0Fh, 1Ch
+	mov 0Eh, 1Bh
+	init1: clr c
+	mov a, 0Fh
+	rlc a
+	mov 0Fh, a
+	mov a, 0Eh
+	rlc a
+	mov 0Eh, a
+	jc xl
+	mov a, 0Dh
+	rlc a
+	mov 0Dh, a
+	djnz 47h, init1
+	sjmp last
+	xl:
+	mov a, 0Dh
+	rlc a
+	mov 0Dh, a
+	djnz 47h, init1
+
+last:	
+	mov a, 0Fh
+	mov b, 40h
+	div ab
+	mov r2, a
+	mov r3, b
+	mov a, #255
+	mov b, 40h
+	div ab
+	inc b
+	push b
+	mov b, 0Eh
+	mul ab
+	mov 0Ah, a
+	mov 09h, b
+	pop b
+	mov a, b
+	mov b, 0Eh
+	mul ab
+rtrn5:	cjne a, 40h, x5
+	sjmp x15
+x5:	jnc x15
+	sjmp x25
+x15:	subb a, 40h
+	push ACC
+	mov a, 0Ah
+	addc a, #01d
+	mov 0Ah, a
+	pop ACC
+	jc cvar5
+	sjmp rtrn5
+cvar5:   clr c
+	mov 09h, #01d
+	sjmp rtrn5
+x25:	mov 0Bh, a
+	mov a, r2
+	add a, 0Ah
+	mov 16h, a
+	mov r1, 09h
+	mov a, r3
+	add a, 0Bh
+	cjne a, 40h, x05
+	sjmp x105
+x05:	jnc x105
+	sjmp x205
+x105:	subb a, 40h
+	inc 16h
+x205:   mov 17h, a
+	clr c
+	mov a, r7
+	addc a, 16h
+	mov r7, a
+	mov a, r6
+	addc a, #00d
+	mov r6, a
+
+
+	cjne r5, #00h, SUB16
+	sjmp inva
+SUB16:  mov     a, 07h           ; load X low byte into acc
+        clr     C               ; clear carry flag
+        subb    a, #0FFh           ; subract Y low byte
+        mov     07h, a           ; put result in Z low byte
+        mov     a, 06h           ; load X high into accumulator
+        subb    a, #0FFh           ; subtract Y high with borrow
+        mov     06h, a           ; save result in Z high byte
+        mov     a, 05h
+        subb    a, #00h
+        mov     05h, a
+        
+        inc 38h
+        cjne r5, #00h, SUB16
+inva:   clr c
+	inc 38h
+	mov a, #0FFh
+        subb a, r7
+        mov 37h, a
+        mov a, #0FFh
+        subb a, r6
+        mov 36h, a
+
+calc9:	mov 0Fh, 40h   ;f ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; w1 off
+	mov a, 	 31h   ;d
+	mov b,   #25d  ;25
+	mul ab
+	mov r7, a
+	mov r6, b
+
+	mov a, r7
+	mov b, 0Fh
+	div ab
+	mov r2, a
+	mov r3, b
+	mov a, #255
+	mov b, 0Fh
+	div ab
+	inc b
+	push b
+	mov b, r6
+	mul ab
+	mov 0Ah, a
+	mov 09h, b
+	pop b
+	mov a, b
+	mov b, r6
+	mul ab
+rtrn9:	cjne a, 0Fh, x9
+	sjmp x19
+x9:	jnc x19
+	sjmp x29
+x19:	subb a, 0Fh
+	push ACC
+	mov a, 0Ah
+	addc a, #01d
+	mov 0Ah, a
+	pop ACC
+	jc cvar9
+	sjmp rtrn9
+cvar9:  clr c
+	mov 09h, #01d
+	sjmp rtrn9
+x29:	mov 0Bh, a
+	mov a, r2
+	add a, 0Ah
+	mov r2, a
+	mov r1, 09h
+	mov a, r3
+	add a, 0Bh
+	cjne a, 0Fh, x09
+	sjmp x109
+x09:	jnc x109
+	sjmp x209
+x109:	subb a, 0Fh
+	inc r2
+x209:   mov r3, a
+
+
+	mov     a, #25d           ; load X low byte into acc
+        mov     b, r2           ; load Y low byte into B
+        mul     ab              ; multiply
+        push    acc             ; stack result low byte
+        push    b               ; stack result high byte
+        mov     a, #25d           ; load X into acc again
+        mov     b, r1           ; load Y high byte into B
+        mul     ab              ; multiply
+        pop     50h             ; recall X*YL high byte
+        add     a, 50h           ; add X*YL high and X*YH low
+        mov     11h, a           ; save result
+        clr     a               ; clear accumulator
+        addc    a, b            ; a = b + carry flag
+        mov     51h, a           ; save result
+        pop     12h             ; get low result
+        
+	mov a, r3
+	mov b, #25d
+	mul ab
+	mov 13h, b
+	mov 14h, a
+
+	mov a, 14h
+	mov b, 0Fh
+	div ab
+	mov r2, a
+	mov r3, b
+	mov a, #255
+	mov b, 0Fh
+	div ab
+	inc b
+	push b
+	mov b, 13h
+	mul ab
+	mov 0Ah, a
+	pop b
+	mov a, b
+	mov b, 13h
+	mul ab
+	cjne a, 0Fh, x1119
+	sjmp x119
+x1119:	jnc x119
+	sjmp x219
+x119:	subb a, 0Fh
+	inc 0Ah
+x219:	mov 0Bh, a
+	mov a, r2
+	add a, 0Ah
+	mov r2, a
+	mov a, r3
+	add a, 0Bh
+	cjne a, 0Fh, x019
+	sjmp x1019
+x019:	jnc x1019
+	sjmp x2019
+x1019:	subb a, 0Fh
+	inc r2
+x2019:  mov r3, a
+	mov 1Ch, r3
+	mov a, 12h
+	clr c
+	addc a, r2
+	mov 1Ah, a
+	mov a, 11h
+	jc crry9
+	mov 19h, a
+	sjmp next9
+crry9:	inc a
+	mov 19h, a
+next9:	
+
+
+	mov 47h, #04d
+	mov r7, 1Ah
+	mov r6, 19h
+	init9: clr c
+	mov a, r7
+	rlc a
+	mov r7, a
+	mov a, r6
+	rlc a
+	mov r6, a
+	jc xm9
+	mov a, r5
+	rlc a
+	mov r5, a
+	djnz 47h, init9
+	sjmp low9
+	xm9:
+	mov a, r5
+	rlc a
+	mov r5, a
+	djnz 47h, init9
+
+low9:
+	mov 47h, #04d
+	mov 0Fh, 1Ch
+	mov 0Eh, 1Bh
+	init19: clr c
+	mov a, 0Fh
+	rlc a
+	mov 0Fh, a
+	mov a, 0Eh
+	rlc a
+	mov 0Eh, a
+	jc xl9
+	mov a, 0Dh
+	rlc a
+	mov 0Dh, a
+	djnz 47h, init19
+	sjmp last9
+	xl9:
+	mov a, 0Dh
+	rlc a
+	mov 0Dh, a
+	djnz 47h, init19
+
+last9:	
+	mov a, 0Fh
+	mov b, 40h
+	div ab
+	mov r2, a
+	mov r3, b
+	mov a, #255
+	mov b, 40h
+	div ab
+	inc b
+	push b
+	mov b, 0Eh
+	mul ab
+	mov 0Ah, a
+	mov 09h, b
+	pop b
+	mov a, b
+	mov b, 0Eh
+	mul ab
+rtrn59:	cjne a, 40h, x59
+	sjmp x159
+x59:	jnc x159
+	sjmp x259
+x159:	subb a, 40h
+	push ACC
+	mov a, 0Ah
+	addc a, #01d
+	mov 0Ah, a
+	pop ACC
+	jc cvar59
+	sjmp rtrn59
+cvar59: clr c
+	mov 09h, #01d
+	sjmp rtrn59
+x259:	mov 0Bh, a
+	mov a, r2
+	add a, 0Ah
+	mov 16h, a
+	mov r1, 09h
+	mov a, r3
+	add a, 0Bh
+	cjne a, 40h, x059
+	sjmp x1059
+x059:	jnc x1059
+	sjmp x2059
+x1059:	subb a, 40h
+	inc 16h
+x2059:  mov 17h, a
+	clr c
+	mov a, r7
+	addc a, 16h
+	mov r7, a
+	mov a, r6
+	addc a, #00d
+	mov r6, a
+
+
+	cjne r5, #00h, SUB169
+	sjmp inva9
+SUB169: mov     a, 07h           ; load X low byte into acc
+        clr     C               ; clear carry flag
+        subb    a, #0FFh           ; subract Y low byte
+        mov     07h, a           ; put result in Z low byte
+        mov     a, 06h           ; load X high into accumulator
+        subb    a, #0FFh           ; subtract Y high with borrow
+        mov     06h, a           ; save result in Z high byte
+        mov     a, 05h
+        subb    a, #00h
+        mov     05h, a
+        
+        inc 39h
+        cjne r5, #00h, SUB169
+inva9:   clr c
+	inc 39h
+	mov a, #0FFh
+        subb a, r7
+        mov 3Fh, a
+        mov a, #0FFh
+        subb a, r6
+        mov 3Eh, a
+
+
+oalc:	mov 0Fh, 5Eh   ;f ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; w2 on
+	mov a, 	 5Fh   ;d
+	mov b,   #25d  ;25
+	mul ab
+	mov r7, a
+	mov r6, b
+
+	mov a, r7
+	mov b, 0Fh
+	div ab
+	mov r2, a
+	mov r3, b
+	mov a, #255
+	mov b, 0Fh
+	div ab
+	inc b
+	push b
+	mov b, r6
+	mul ab
+	mov 0Ah, a
+	mov 09h, b
+	pop b
+	mov a, b
+	mov b, r6
+	mul ab
+otrn:	cjne a, 0Fh, o
+	sjmp o1
+o:	jnc o1
+	sjmp o2
+o1:	subb a, 0Fh
+	push ACC
+	mov a, 0Ah
+	addc a, #01d
+	mov 0Ah, a
+	pop ACC
+	jc ovar
+	sjmp otrn
+ovar:   clr c
+	mov 09h, #01d
+	sjmp otrn
+o2:	mov 0Bh, a
+	mov a, r2
+	add a, 0Ah
+	mov r2, a
+	mov r1, 09h
+	mov a, r3
+	add a, 0Bh
+	cjne a, 0Fh, o0
+	sjmp o10
+o0:	jnc o10
+	sjmp o20
+o10:	subb a, 0Fh
+	inc r2
+o20:    mov r3, a
+
+
+	mov     a, #25d           ; load X low byte into acc
+        mov     b, r2           ; load Y low byte into B
+        mul     ab              ; multiply
+        push    acc             ; stack result low byte
+        push    b               ; stack result high byte
+        mov     a, #25d           ; load X into acc again
+        mov     b, r1           ; load Y high byte into B
+        mul     ab              ; multiply
+        pop     50h             ; recall X*YL high byte
+        add     a, 50h           ; add X*YL high and X*YH low
+        mov     11h, a           ; save result
+        clr     a               ; clear accumulator
+        addc    a, b            ; a = b + carry flag
+        mov     51h, a           ; save result
+        pop     12h             ; get low result
+        
+	mov a, r3
+	mov b, #25d
+	mul ab
+	mov 13h, b
+	mov 14h, a
+
+	mov a, 14h
+	mov b, 0Fh
+	div ab
+	mov r2, a
+	mov r3, b
+	mov a, #255
+	mov b, 0Fh
+	div ab
+	inc b
+	push b
+	mov b, 13h
+	mul ab
+	mov 0Ah, a
+	pop b
+	mov a, b
+	mov b, 13h
+	mul ab
+	cjne a, 0Fh, o111
+	sjmp o11
+o111:	jnc o11
+	sjmp o21
+o11:	subb a, 0Fh
+	inc 0Ah
+o21:	mov 0Bh, a
+	mov a, r2
+	add a, 0Ah
+	mov r2, a
+	mov a, r3
+	add a, 0Bh
+	cjne a, 0Fh, o01
+	sjmp o101
+o01:	jnc o101
+	sjmp o201
+o101:	subb a, 0Fh
+	inc r2
+o201:   mov r3, a
+	mov 1Ch, r3
+	mov a, 12h
+	clr c
+	addc a, r2
+	mov 1Ah, a
+	mov a, 11h
+	jc orry
+	mov 19h, a
+	sjmp oext
+orry:	inc a
+	mov 19h, a
+oext:	
+
+
+	mov 47h, #04d
+	mov r7, 1Ah
+	mov r6, 19h
+	onit: clr c
+	mov a, r7
+	rlc a
+	mov r7, a
+	mov a, r6
+	rlc a
+	mov r6, a
+	jc om
+	mov a, r5
+	rlc a
+	mov r5, a
+	djnz 47h, onit
+	sjmp oow
+	om:
+	mov a, r5
+	rlc a
+	mov r5, a
+	djnz 47h, onit
+
+oow:
+	mov 47h, #04d
+	mov 0Fh, 1Ch
+	mov 0Eh, 1Bh
+	onit1: clr c
+	mov a, 0Fh
+	rlc a
+	mov 0Fh, a
+	mov a, 0Eh
+	rlc a
+	mov 0Eh, a
+	jc ol
+	mov a, 0Dh
+	rlc a
+	mov 0Dh, a
+	djnz 47h, onit1
+	sjmp oast
+	ol:
+	mov a, 0Dh
+	rlc a
+	mov 0Dh, a
+	djnz 47h, onit1
+
+oast:	
+	mov a, 0Fh
+	mov b, 5Eh
+	div ab
+	mov r2, a
+	mov r3, b
+	mov a, #255
+	mov b, 5Eh
+	div ab
+	inc b
+	push b
+	mov b, 0Eh
+	mul ab
+	mov 0Ah, a
+	mov 09h, b
+	pop b
+	mov a, b
+	mov b, 0Eh
+	mul ab
+otrn5:	cjne a, 5Eh, o5
+	sjmp o15
+o5:	jnc o15
+	sjmp o25
+o15:	subb a, 5Eh
+	push ACC
+	mov a, 0Ah
+	addc a, #01d
+	mov 0Ah, a
+	pop ACC
+	jc ovar5
+	sjmp otrn5
+ovar5:   clr c
+	mov 09h, #01d
+	sjmp otrn5
+o25:	mov 0Bh, a
+	mov a, r2
+	add a, 0Ah
+	mov 16h, a
+	mov r1, 09h
+	mov a, r3
+	add a, 0Bh
+	cjne a, 5Eh, o05
+	sjmp o105
+o05:	jnc o105
+	sjmp o205
+o105:	subb a, 5Eh
+	inc 16h
+o205:   mov 17h, a
+	clr c
+	mov a, r7
+	addc a, 16h
+	mov r7, a
+	mov a, r6
+	addc a, #00d
+	mov r6, a
+
+
+	cjne r5, #00h, oUB16
+	sjmp onva
+oUB16:  mov     a, 07h           ; load X low byte into acc
+        clr     C               ; clear carry flag
+        subb    a, #0FFh           ; subract Y low byte
+        mov     07h, a           ; put result in Z low byte
+        mov     a, 06h           ; load X high into accumulator
+        subb    a, #0FFh           ; subtract Y high with borrow
+        mov     06h, a           ; save result in Z high byte
+        mov     a, 05h
+        subb    a, #00h
+        mov     05h, a
+        
+        inc 3ah
+        cjne r5, #00h, oUB16
+onva:   clr c
+	inc 3ah
+	mov a, #0FFh
+        subb a, r7
+        mov 4fh, a
+        mov a, #0FFh
+        subb a, r6
+        mov 4eh, a
+
+        mov r0, #20h
+del:    mov @r0, #00h
+        djnz r0, del
+
+oalc9:	mov 0Fh, 5Eh   ;f ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; w2 off
+	mov a, 	 5Dh   ;d
+	mov b,   #25d  ;25
+	mul ab
+	mov r7, a
+	mov r6, b
+
+	mov a, r7
+	mov b, 0Fh
+	div ab
+	mov r2, a
+	mov r3, b
+	mov a, #255
+	mov b, 0Fh
+	div ab
+	inc b
+	push b
+	mov b, r6
+	mul ab
+	mov 0Ah, a
+	mov 09h, b
+	pop b
+	mov a, b
+	mov b, r6
+	mul ab
+otrn9:	cjne a, 0Fh, o9
+	sjmp o19
+o9:	jnc o19
+	sjmp o29
+o19:	subb a, 0Fh
+	push ACC
+	mov a, 0Ah
+	addc a, #01d
+	mov 0Ah, a
+	pop ACC
+	jc ovar9
+	sjmp otrn9
+ovar9:  clr c
+	mov 09h, #01d
+	sjmp otrn9
+o29:	mov 0Bh, a
+	mov a, r2
+	add a, 0Ah
+	mov r2, a
+	mov r1, 09h
+	mov a, r3
+	add a, 0Bh
+	cjne a, 0Fh, o09
+	sjmp o109
+o09:	jnc o109
+	sjmp o209
+o109:	subb a, 0Fh
+	inc r2
+o209:   mov r3, a
+
+
+	mov     a, #25d           ; load X low byte into acc
+        mov     b, r2           ; load Y low byte into B
+        mul     ab              ; multiply
+        push    acc             ; stack result low byte
+        push    b               ; stack result high byte
+        mov     a, #25d           ; load X into acc again
+        mov     b, r1           ; load Y high byte into B
+        mul     ab              ; multiply
+        pop     50h             ; recall X*YL high byte
+        add     a, 50h           ; add X*YL high and X*YH low
+        mov     11h, a           ; save result
+        clr     a               ; clear accumulator
+        addc    a, b            ; a = b + carry flag
+        mov     51h, a           ; save result
+        pop     12h             ; get low result
+        
+	mov a, r3
+	mov b, #25d
+	mul ab
+	mov 13h, b
+	mov 14h, a
+
+	mov a, 14h
+	mov b, 0Fh
+	div ab
+	mov r2, a
+	mov r3, b
+	mov a, #255
+	mov b, 0Fh
+	div ab
+	inc b
+	push b
+	mov b, 13h
+	mul ab
+	mov 0Ah, a
+	pop b
+	mov a, b
+	mov b, 13h
+	mul ab
+	cjne a, 0Fh, o1119
+	sjmp o119
+o1119:	jnc o119
+	sjmp o219
+o119:	subb a, 0Fh
+	inc 0Ah
+o219:	mov 0Bh, a
+	mov a, r2
+	add a, 0Ah
+	mov r2, a
+	mov a, r3
+	add a, 0Bh
+	cjne a, 0Fh, o019
+	sjmp o1019
+o019:	jnc o1019
+	sjmp o2019
+o1019:	subb a, 0Fh
+	inc r2
+o2019:  mov r3, a
+	mov 1Ch, r3
+	mov a, 12h
+	clr c
+	addc a, r2
+	mov 1Ah, a
+	mov a, 11h
+	jc orry9
+	mov 19h, a
+	sjmp oext9
+orry9:	inc a
+	mov 19h, a
+oext9:	
+
+
+	mov 47h, #04d
+	mov r7, 1Ah
+	mov r6, 19h
+	onit9: clr c
+	mov a, r7
+	rlc a
+	mov r7, a
+	mov a, r6
+	rlc a
+	mov r6, a
+	jc om9
+	mov a, r5
+	rlc a
+	mov r5, a
+	djnz 47h, onit9
+	sjmp oow9
+	om9:
+	mov a, r5
+	rlc a
+	mov r5, a
+	djnz 47h, onit9
+
+oow9:
+	mov 47h, #04d
+	mov 0Fh, 1Ch
+	mov 0Eh, 1Bh
+	onit19: clr c
+	mov a, 0Fh
+	rlc a
+	mov 0Fh, a
+	mov a, 0Eh
+	rlc a
+	mov 0Eh, a
+	jc ol9
+	mov a, 0Dh
+	rlc a
+	mov 0Dh, a
+	djnz 47h, onit19
+	sjmp oast9
+	ol9:
+	mov a, 0Dh
+	rlc a
+	mov 0Dh, a
+	djnz 47h, onit19
+
+oast9:	
+	mov a, 0Fh
+	mov b, 5Eh
+	div ab
+	mov r2, a
+	mov r3, b
+	mov a, #255
+	mov b, 5Eh
+	div ab
+	inc b
+	push b
+	mov b, 0Eh
+	mul ab
+	mov 0Ah, a
+	mov 09h, b
+	pop b
+	mov a, b
+	mov b, 0Eh
+	mul ab
+otrn59:	cjne a, 5Eh, o59
+	sjmp o159
+o59:	jnc o159
+	sjmp o259
+o159:	subb a, 5Eh
+	push ACC
+	mov a, 0Ah
+	addc a, #01d
+	mov 0Ah, a
+	pop ACC
+	jc ovar59
+	sjmp otrn59
+ovar59: clr c
+	mov 09h, #01d
+	sjmp otrn59
+o259:	mov 0Bh, a
+	mov a, r2
+	add a, 0Ah
+	mov 16h, a
+	mov r1, 09h
+	mov a, r3
+	add a, 0Bh
+	cjne a, 5Eh, o059
+	sjmp o1059
+o059:	jnc o1059
+	sjmp o2059
+o1059:	subb a, 5Eh
+	inc 16h
+o2059:  mov 17h, a
+	clr c
+	mov a, r7
+	addc a, 16h
+	mov r7, a
+	mov a, r6
+	addc a, #00d
+	mov r6, a
+
+
+	cjne r5, #00h, oUB169
+	sjmp onva9
+oUB169: mov     a, 07h           ; load X low byte into acc
+        clr     C               ; clear carry flag
+        subb    a, #0FFh           ; subract Y low byte
+        mov     07h, a           ; put result in Z low byte
+        mov     a, 06h           ; load X high into accumulator
+        subb    a, #0FFh           ; subtract Y high with borrow
+        mov     06h, a           ; save result in Z high byte
+        mov     a, 05h
+        subb    a, #00h
+        mov     05h, a
+        
+        inc 3bh
+        cjne r5, #00h, oUB169
+onva9:  clr c
+	inc 3bh
+	mov a, #0FFh
+        subb a, r7
+        mov 57h, a
+        mov a, #0FFh
+        subb a, r6
+        mov 56h, a
+        
+ledalga:mov a, 30h     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;led dalga
+	mov b , #5d
+	div ab
+	mov 3Dh, a
+	mov a, #20d
+	subb a, 3Dh
+	mov 3Ch, a
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;dalgadalgadalgadalga
+	clr a 
+	mov r0, 3Ch
+	mov r1, #1h
+	mov r2, 38h
+	mov r3, 39h
+	mov r4, 3Dh
+	mov r5, #1h
+	mov r6, 3Ah
+	mov r7, 3Bh
+	
+	mov tcon, #01010000b
+	
+	cjne r2, #00h, y
+	setb tf0
+y:	cjne r6, #00h, say
+	setb tf1
+say: 	sjmp say
+
+kes1: 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;w1
+	cjne r2, #00h , y11
+	jnb 00h, y2
+	sjmp y21
+y11: 	djnz r2, y22
+y2:	clr tr0	
+	mov th0, 41h
+ 	mov tl0, 42h
+ 	setb tr0
+ 	setb 00h
+ 	reti
+y21: 	cjne r1, #01h, y3
+	cpl P2.6
+	dec r1
+y3:	cjne r3, #00h, y31
+	jnb 01h, y32
+	sjmp setle
+y31:	dec r3
+	reti
+y32:	clr tr0
+	mov th0 ,44h
+	mov tl0, 45h
+	setb tr0
+	setb 01h
+	reti
+setle: 	setb p2.6
+y22: 	reti
+
+kes2: 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;w2
+y4: 	cjne r6, #00h, y41
+	jnb 02h, y42
+	sjmp y43
+y41:	djnz r6, bitir
+y42:	clr tr1
+ 	mov th1, 47h
+ 	mov tl1, 48h
+	setb tr1
+	setb 02h
+	reti	
+y43: 	cjne r5, #01h, y4
+	cpl p2.7
+	dec r5
+y44: 	cjne r7, #00h, y5
+	jnb 03h ,y51
+	sjmp setle2
+y5: 	djnz r7, bitir
+y51:	clr tr1
+	mov th1, 4Ah
+	mov tl1, 4bh
+	setb tr1
+	setb 03h
+	reti
+setle2: setb p2.7
+bitir: 	reti
+
+LED:	jb 04h, gec;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;led delagasi
+	inc a
+	cjne a,04h, yuk 
+	cpl p2.5
+	clr a
+	setb 04h
+gec:	inc a
+	cjne a,00h,yuk 
+	clr a
+	cpl p2.5
+	clr 04h
+yuk:	mov r3, 43h
+	mov r1, #01h
+	mov r2, 40h
+	clr 00h
+	clr 01h 
+	cjne r2, #00h, yeter
+	
+	setb tf0
+yeter:	ret
+
+	clr 02h
+	clr 03h
+	mov r7, 49h
+	mov r5,#01h
+	mov r6, 46h
+	cjne r6, #00h, yeterr
+	setb tf1
+	
+yeterr: ret
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+DATA_LOOP:	movc a,@a+dptr
+		jz KEYBOARD_LOOP
+		acall SEND_DATA
+		clr a
+		inc dptr
+		sjmp DATA_LOOP
+		ret
+		
+DATA_LOOP2:	movc a,@a+dptr
+		jz KEYBOARD_LOOP2
+		acall SEND_DATA
+		clr a
+		inc dptr
+		sjmp DATA_LOOP2
+		ret
+		
+KEYBOARD_LOOP:	acall KEYBOARD
+		cjne a, #65, seri
+		ljmp fh
+
+KEYBOARD_LOOP2:	acall KEYBOARD
+		cjne a, #65, seri2
+		ljmp Dh
+		
+seri:		push ACC
+		clr c
+		subb a, #30h
+		mov @r0, a
+		inc r0
+		pop ACC
+		acall SEND_DATA
+		sjmp KEYBOARD_LOOP
+
+seri2:		push ACC
+		clr c
+		subb a, #30h
+		mov @r1, a
+		inc r0
+		pop ACC
+		acall SEND_DATA
+		sjmp KEYBOARD_LOOP2
+		
+CONFIGURE_LCD:	mov a,#38H
+		acall SEND_COMMAND
+		mov a,#0FH
+		acall SEND_COMMAND
+		mov a,#06H
+		acall SEND_COMMAND
+		mov a,#01H
+		acall SEND_COMMAND
+		mov a,#80H
+		acall SEND_COMMAND
+		ret
+
+		
+CONFIGURE_LCD2:	mov a,#3CH
+		acall SEND_COMMAND
+		mov a,#0C0H
+		acall SEND_COMMAND
+		ret 
+
+		
+SEND_COMMAND:	mov p1,a
+		clr p3.5
+		clr p3.6
+		setb p3.7
+		acall DELAY
+		clr p3.7
+		ret
+
+SEND_DATA:	mov p1,a
+		setb p3.5
+		clr p3.6
+		setb p3.7
+		acall DELAY
+		clr p3.7
+		ret
+
+DELAY:		push 0
+		push 1
+		mov r0,#50
+
+DELAY_OUT_LOOP: mov r1,#255
+		djnz r1,$
+		djnz r0,DELAY_OUT_LOOP
+		pop 1
+		pop 0
+		ret
+
+KEYBOARD:	mov	P0, #0ffh
+
+K1:		mov	P2, #0	;ground all rows
+		mov	A, P0
+		anl	A, #00001111B
+		cjne	A, #00001111B, K1
+	
+K2:		acall	DELAY
+		mov	A, P0
+		anl	A, #00001111B
+		cjne	A, #00001111B, KB_OVER
+		sjmp	K2
+	
+KB_OVER:	acall DELAY
+		mov	A, P0
+		anl	A, #00001111B
+		cjne	A, #00001111B, KB_OVER1
+		sjmp	K2
+
+KB_OVER1:	mov	P2, #11111110B
+		mov	A, P0
+		anl	A, #00001111B
+		cjne	A, #00001111B, ROW_0
+		mov	P2, #11111101B
+		mov	A, P0
+		anl	A, #00001111B
+		cjne	A, #00001111B, ROW_1
+		mov	P2, #11111011B
+		mov	A, P0
+		anl	A, #00001111B
+		cjne	A, #00001111B, ROW_2
+		mov	P2, #11110111B
+		mov	A, P0
+		anl	A, #00001111B
+		cjne	A, #00001111B, ROW_3
+		ljmp	K2
+
+
+ROW_0:		mov	DPTR, #KCODE0
+		sjmp	KB_FIND
+
+ROW_1:		mov	DPTR, #KCODE1
+		sjmp	KB_FIND
+
+ROW_2:		mov	DPTR, #KCODE2
+		sjmp	KB_FIND
+
+ROW_3:		mov	DPTR, #KCODE3
+
+KB_FIND:	rrc	A
+		jnc	KB_MATCH
+		inc	DPTR
+		sjmp	KB_FIND
+
+KB_MATCH:	clr	A
+		movc	A, @A+DPTR; get ASCII code from the table 
+		ret
+
+KCODE0:	DB	'1', '2', '3', 'A'
+KCODE1:	DB	'4', '5', '6', 'B'
+KCODE2:	DB	'7', '8', '9', 'C'
+KCODE3:	DB	'*', '0', '#', 'D'
+f:	DB	'f = ', 0
+D:	DB	'D = ', 0
+
+	END

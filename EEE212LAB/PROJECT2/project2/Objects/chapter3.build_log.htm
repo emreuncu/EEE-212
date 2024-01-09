@@ -1,0 +1,205 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: µVision V5.38.0.0
+Copyright (C) 2022 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: emre uncu, ihsan dogramaci bilkent university, LIC=----
+ 
+Tool Versions:
+Toolchain:       MDK-Lite  Version: 5.38.0.0
+Toolchain Path:  C:\Keil_v5\ARM\ARMCLANG\Bin
+C Compiler:      ArmClang.exe V6.19
+Assembler:       Armasm.exe V6.19
+Linker/Locator:  ArmLink.exe V6.19
+Library Manager: ArmAr.exe V6.19
+Hex Converter:   FromElf.exe V6.19
+CPU DLL:         SARMCM3.DLL V5.38.0.0
+Dialog DLL:      DARMCM1.DLL V1.19.6.0
+Target DLL:      PEMicro\Pemicro_ArmCortexInterface.dll V1.3.0.0
+Dialog DLL:      TARMCM1.DLL V1.14.6.0
+ 
+<h2>Project:</h2>
+C:\Users\Emre\Desktop\tutorial\tutorial_code\tutorial.uvprojx
+Project File Date:  05/20/2023
+
+<h2>Output:</h2>
+*** Using Compiler 'V6.19', folder: 'C:\Keil_v5\ARM\ARMCLANG\Bin'
+Build target 'Target 1'
+tutorial.c(3): warning: In file included from...
+./utils.h(1): warning: non-portable path to file '<MKL25Z4.h>'; specified path differs in case from file name on disk [-Wnonportable-include-path]
+#include <MKL25Z4.H>
+         ^~~~~~~~~~~
+         <MKL25Z4.h>
+./utils.h(22): warning: a function declaration without a prototype is deprecated in all versions of C [-Wstrict-prototypes]
+int get_number_from_keypad();
+                          ^
+                           void
+./utils.h(24): warning: a function declaration without a prototype is deprecated in all versions of C [-Wstrict-prototypes]
+int get_number_from_keypad(){
+                          ^
+                           void
+./utils.h(24): warning: no previous prototype for function 'get_number_from_keypad' [-Wmissing-prototypes]
+int get_number_from_keypad(){
+    ^
+./utils.h(22): note: this declaration is not a prototype; add 'void' to make it a prototype for a zero-parameter function
+int get_number_from_keypad();
+    ^
+                           void
+./utils.h(64): warning: implicit conversion changes signedness: 'uint32_t' (aka 'unsigned int') to 'int' [-Wsign-conversion]
+                        key=keypad_getkey();
+                           ~^~~~~~~~~~~~~~~
+./utils.h(80): warning: passing 'char[32]' to parameter of type 'unsigned char *' converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+                        print_fnc(read_buffer);
+                                  ^~~~~~~~~~~
+./utils.h(16): note: passing argument to parameter 'data' here
+void print_fnc(unsigned char *data);
+                              ^
+./utils.h(52): warning: mixing declarations and code is incompatible with standards before C99 [-Wdeclaration-after-statement]
+        int idx;
+            ^
+./utils.h(46): warning: no previous prototype for function 'read_to_buffer' [-Wmissing-prototypes]
+void read_to_buffer(int* read_coeff, int len){
+     ^
+./utils.h(46): note: declare 'static' if the function is not intended to be used outside of this translation unit
+void read_to_buffer(int* read_coeff, int len){
+^
+static 
+./utils.h(105): warning: implicit conversion loses integer precision: 'int' to 'char' [-Wimplicit-int-conversion]
+                buffer[i] = (significant/q) + '0';
+                          ~ ~~~~~~~~~~~~~~~~^~~~~
+./utils.h(111): warning: implicit conversion loses integer precision: 'int' to 'char' [-Wimplicit-int-conversion]
+                buffer[i] = (point - (point/10)*10) + '0';
+                          ~ ~~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+./utils.h(94): warning: mixing declarations and code is incompatible with standards before C99 [-Wdeclaration-after-statement]
+        int point = (int) number;
+            ^
+./utils.h(118): warning: function 'blink' could be declared with attribute 'noreturn' [-Wmissing-noreturn]
+void blink(void){
+                ^
+tutorial.c(13): warning: no previous extern declaration for non-static variable 'm' [-Wmissing-variable-declarations]
+volatile int m = 0;
+             ^
+tutorial.c(13): note: declare 'static' if the variable is not intended to be used outside of this translation unit
+volatile int m = 0;
+         ^
+tutorial.c(19): warning: passing 'char[17]' to parameter of type 'unsigned char *' converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+        print_fnc("frequency: 840Hz");
+                  ^~~~~~~~~~~~~~~~~~
+./utils.h(150): note: passing argument to parameter 'data' here
+void print_fnc(unsigned char *data)
+                              ^
+tutorial.c(21): warning: passing 'char[12]' to parameter of type 'unsigned char *' converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+        print_fnc("amplitude: ");
+                  ^~~~~~~~~~~~~
+./utils.h(150): note: passing argument to parameter 'data' here
+void print_fnc(unsigned char *data)
+                              ^
+tutorial.c(58): warning: implicit conversion changes signedness: 'int' to 'unsigned int' [-Wsign-conversion]
+                                        DAC0->DAT[0].DATL = result*squarewave[i]/5000 & 0xff; 
+                                                                  ~^~~~~~~~~~~~~
+tutorial.c(59): warning: implicit conversion changes signedness: 'int' to 'unsigned int' [-Wsign-conversion]
+                                        DAC0->DAT[0].DATH = (result*squarewave[i]/5000 >> 8) & 0x0f;
+                                                                   ~^~~~~~~~~~~~~
+tutorial.c(66): warning: implicit conversion from 'const int' to 'float' may lose precision [-Wimplicit-int-float-conversion]
+                                                        DAC0->DAT[0].DATL = ((int)(sinwawe[x] * coef)) & 0xff; 
+                                                                                   ^~~~~~~~~~ ~
+tutorial.c(67): warning: implicit conversion from 'const int' to 'float' may lose precision [-Wimplicit-int-float-conversion]
+                                                        DAC0->DAT[0].DATH = (((int)(sinwawe[x] * coef)) >> 8) & 0x0f;
+                                                                                    ^~~~~~~~~~ ~
+tutorial.c(68): warning: implicit conversion changes signedness: 'int' to 'unsigned int' [-Wsign-conversion]
+                                                        Delay(n); }}
+                                                        ~~~~~ ^
+tutorial.c(86): warning: implicit conversion changes signedness: 'int' to 'unsigned int' [-Wsign-conversion]
+                                        DAC0->DAT[0].DATL = result*sawtoothwave[i]/(sawtooth) & 0xff; 
+                                                                  ~^~~~~~~~~~~~~~~
+tutorial.c(87): warning: implicit conversion changes signedness: 'int' to 'unsigned int' [-Wsign-conversion]
+                                        DAC0->DAT[0].DATH = (result*sawtoothwave[i]/(sawtooth) >> 8) & 0x0f;
+                                                                   ~^~~~~~~~~~~~~~~
+tutorial.c(93): warning: implicit conversion loses floating-point precision: 'double' to 'float' [-Wimplicit-float-conversion]
+                        coef = result / 4096.0; }}
+                             ~ ~~~~~~~^~~~~~~~
+tutorial.c(22): warning: mixing declarations and code is incompatible with standards before C99 [-Wdeclaration-after-statement]
+        int x;
+            ^
+tutorial.c(109): warning: implicit conversion changes signedness: 'int' to 'unsigned int' [-Wsign-conversion]
+        PTA->PDDR &= ~0x0002; /* make pin input */
+                  ~~ ^~~~~~~
+tutorial.c(110): warning: implicit conversion changes signedness: 'int' to 'unsigned int' [-Wsign-conversion]
+        PORTA->PCR[1] &= ~0xF0000; /* clear interrupt selection */
+                      ~~ ^~~~~~~~
+tutorial.c(132): warning: implicit conversion turns floating-point number into integer: 'double' to 'uint32_t' (aka 'unsigned int') [-Wfloat-conversion]
+        result = ((result + 1)*3.3)*1000/4096;
+               ~ ~~~~~~~~~~~~~~~~~~~~~~~^~~~~
+tutorial.c(133): warning: implicit conversion turns floating-point number into integer: 'float' to 'uint32_t' (aka 'unsigned int') [-Wfloat-conversion]
+                        result = (float) result;
+                               ~ ^~~~~~~~~~~~~~
+tutorial.c(134): warning: implicit conversion from 'uint32_t' (aka 'unsigned int') to 'float' may lose precision [-Wimplicit-int-float-conversion]
+                        print_to_arr(arry, result, 1);
+                        ~~~~~~~~~~~~       ^~~~~~
+tutorial.c(136): warning: passing 'char[17]' to parameter of type 'unsigned char *' converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+                        print_fnc("frequency: 840Hz");
+                                  ^~~~~~~~~~~~~~~~~~
+./utils.h(150): note: passing argument to parameter 'data' here
+void print_fnc(unsigned char *data)
+                              ^
+tutorial.c(138): warning: passing 'char[12]' to parameter of type 'unsigned char *' converts between pointers to integer types where one is of the unique plain 'char' type and the other is not [-Wpointer-sign]
+                        print_fnc("amplitude: ");
+                                  ^~~~~~~~~~~~~
+./utils.h(150): note: passing argument to parameter 'data' here
+void print_fnc(unsigned char *data)
+                              ^
+tutorial.c(174): warning: implicit conversion changes signedness: 'int' to 'unsigned int' [-Wsign-conversion]
+        ADC0->SC2 &= ~0x40; /* software trigger */
+                  ~~ ^~~~~
+tutorial.c(6): warning: no previous extern declaration for non-static variable 'squarewave' [-Wmissing-variable-declarations]
+int squarewave[square];
+    ^
+tutorial.c(6): note: declare 'static' if the variable is not intended to be used outside of this translation unit
+int squarewave[square];
+^
+tutorial.c(7): warning: no previous extern declaration for non-static variable 'sawtoothwave' [-Wmissing-variable-declarations]
+int sawtoothwave[sawtooth];
+    ^
+tutorial.c(7): note: declare 'static' if the variable is not intended to be used outside of this translation unit
+int sawtoothwave[sawtooth];
+^
+34 warnings generated.
+compiling tutorial.c...
+linking...
+Program Size: Code=5424 RO-data=640 RW-data=4 ZI-data=640  
+".\Objects\chapter3.axf" - 0 Error(s), 34 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: ARM
+                http://www.keil.com/pack/ARM.CMSIS.5.9.0.pack
+                ARM.CMSIS.5.9.0
+                CMSIS (Common Microcontroller Software Interface Standard)
+   * Component: CORE Version: 5.6.0
+
+Package Vendor: Keil
+                http://www.keil.com/pack/Keil.Kinetis_KLxx_DFP.1.15.0.pack
+                Keil.Kinetis_KLxx_DFP.1.15.0
+                NXP Kinetis KLxx Series Device Support and Examples
+   * Component: Startup Version: 2.5.0
+
+<h2>Collection of Component include folders:</h2>
+  ./RTE/Device/MKL25Z128xxx4
+  ./RTE/_Target_1
+  C:/Keil_v5/ARM/CMSIS/5.9.0/CMSIS/Core/Include
+  C:/Keil_v5/Keil/Kinetis_KLxx_DFP/1.15.0/Device/Include
+
+<h2>Collection of Component Files used:</h2>
+
+   * Component: ARM::CMSIS:CORE:5.6.0
+
+   * Component: Keil::Device:Startup:2.5.0
+      Source file:   Device/Source/system_MKL25Z4.c
+      Source file:   Device/Source/ARM/startup_MKL25Z4.s
+      Include file:  Device/Source/system_MKL25Z4.h
+Build Time Elapsed:  00:00:01
+</pre>
+</body>
+</html>

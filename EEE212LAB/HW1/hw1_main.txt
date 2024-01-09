@@ -1,0 +1,236 @@
+		org 00h
+
+		mov r0, #40h
+		mov 46h, #0d
+		acall	CONFIGURE_LCD
+		clr a
+		mov dptr,#PHI
+		acall DATA_LOOP
+
+finish:		mov a, #29h
+		acall SEND_DATA
+		mov a, #3dh
+		acall SEND_DATA
+		mov a, 35h
+		acall SEND_DATA
+		mov a, 36h
+		acall SEND_DATA
+		mov a, 37h
+		acall SEND_DATA
+
+xxxxxxxxx:	sjmp xxxxxxxxx
+
+DATA_LOOP:	movc a,@a+dptr
+		jz KEYBOARD_LOOP
+		acall SEND_DATA
+		clr a
+		inc dptr
+		sjmp DATA_LOOP
+		ret
+
+KEYBOARD_LOOP:	acall KEYBOARD
+		cjne a, #65, seri
+		ljmp clcltr
+
+seri:		push ACC
+		clr c
+		subb a, #30h
+		mov @r0, a
+		inc r0
+		inc 46h
+		pop ACC
+		acall SEND_DATA
+		sjmp KEYBOARD_LOOP
+
+
+clcltr:		mov a, 46h
+		cjne a, #01h, dwm1
+		mov a, 40h
+		mov 45h, a
+		sjmp y
+		
+dwm1:		pop ACC
+		mov a, 40h
+		mov b, #10d
+		mul ab
+		add a, 41h
+		mov 45h, a
+		mov a, 46h
+		cjne a, #02h, dwm2
+		sjmp y
+
+dwm2:		mov a, 45h
+		mov b, #10d
+		mul ab
+		add a, 42h
+		mov 45h, a
+		sjmp y
+
+y:		mov dptr, #primes
+		mov r0, #30h
+		mov r2, #54
+
+rtrn:		mov r3, 45h
+		cjne r3, #01h, start
+		mov a, r3
+		ljmp dtoh
+
+start:		clr a
+		movc a,@a+dptr
+		mov b,a
+		mov r5, b
+		mov a, r3
+		acall dvsn
+		inc dptr
+		djnz r2,rtrn
+
+		mov r0, #30h
+again:		mov a, @r0
+		cjne a, #00h, mult
+		ljmp dtoh
+		
+mult:		mov a, r3
+		mov b, @r0
+		div ab
+		mov b, @r0
+		dec b
+		mul ab
+		mov r3, a
+		inc r0
+		sjmp again
+
+dvsn:		div ab
+		mov r4,b
+		mov a, r5
+		cjne r4, #00h, x
+		mov @r0, a
+		inc r0
+		
+x:		clr c
+		ret
+
+dtoh:		mov a, r3
+		mov b, #10d
+		div ab
+		push ACC
+		mov a, b
+		add a, #30h
+		mov 37h, a
+		pop ACC
+		mov b, #10d
+		div ab
+		push ACC
+		mov a, b
+		add a, #30h
+		mov 36h, a
+		pop ACC
+		add a, #30h
+		mov 35h, a
+		ljmp finish
+
+CONFIGURE_LCD:	mov a,#38H
+		acall SEND_COMMAND
+		mov a,#0FH
+		acall SEND_COMMAND
+		mov a,#06H
+		acall SEND_COMMAND
+		mov a,#01H
+		acall SEND_COMMAND
+		mov a,#80H
+		acall SEND_COMMAND
+		ret
+
+SEND_COMMAND:	mov p1,a
+		clr p3.5
+		clr p3.6
+		setb p3.7
+		acall DELAY
+		clr p3.7
+		ret
+
+SEND_DATA:	mov p1,a
+		setb p3.5
+		clr p3.6
+		setb p3.7
+		acall DELAY
+		clr p3.7
+		ret
+
+DELAY:		push 0
+		push 1
+		mov r0,#50
+
+DELAY_OUT_LOOP: mov r1,#255
+		djnz r1,$
+		djnz r0,DELAY_OUT_LOOP
+		pop 1
+		pop 0
+		ret
+
+KEYBOARD:	mov	P0, #0ffh
+
+K1:		mov	P2, #0	;ground all rows
+		mov	A, P0
+		anl	A, #00001111B
+		cjne	A, #00001111B, K1
+	
+K2:		acall	DELAY
+		mov	A, P0
+		anl	A, #00001111B
+		cjne	A, #00001111B, KB_OVER
+		sjmp	K2
+	
+KB_OVER:	acall DELAY
+		mov	A, P0
+		anl	A, #00001111B
+		cjne	A, #00001111B, KB_OVER1
+		sjmp	K2
+
+KB_OVER1:	mov	P2, #11111110B
+		mov	A, P0
+		anl	A, #00001111B
+		cjne	A, #00001111B, ROW_0
+		mov	P2, #11111101B
+		mov	A, P0
+		anl	A, #00001111B
+		cjne	A, #00001111B, ROW_1
+		mov	P2, #11111011B
+		mov	A, P0
+		anl	A, #00001111B
+		cjne	A, #00001111B, ROW_2
+		mov	P2, #11110111B
+		mov	A, P0
+		anl	A, #00001111B
+		cjne	A, #00001111B, ROW_3
+		ljmp	K2
+
+
+ROW_0:		mov	DPTR, #KCODE0
+		sjmp	KB_FIND
+
+ROW_1:		mov	DPTR, #KCODE1
+		sjmp	KB_FIND
+
+ROW_2:		mov	DPTR, #KCODE2
+		sjmp	KB_FIND
+
+ROW_3:		mov	DPTR, #KCODE3
+
+KB_FIND:	rrc	A
+		jnc	KB_MATCH
+		inc	DPTR
+		sjmp	KB_FIND
+
+KB_MATCH:	clr	A
+		movc	A, @A+DPTR; get ASCII code from the table 
+		ret
+
+KCODE0:	DB	'1', '2', '3', 'A'
+KCODE1:	DB	'4', '5', '6', 'B'
+KCODE2:	DB	'7', '8', '9', 'C'
+KCODE3:	DB	'*', '0', '#', 'D'
+PHI:	DB	'PHI(', 0
+EQUAL:	DB	')=', 0
+primes:	DB 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251
+
+	END
